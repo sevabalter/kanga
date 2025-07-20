@@ -112,26 +112,30 @@ app.get('/api/question', async (req, res) => {
   }
 });
 
-app.post('/api/validate', async (req, res, next) => {
+app.post('/api/answer', async (req, res, next) => {
   try {
-    const { question, answer, userAnswer } = req.body;
+    const { question, answer } = req.body;
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       temperature: 0,
-      max_tokens : 50,
       messages: [
-        { role: 'system', content: 'You are a math tutor.' },
-        { role: 'user',
-          content:
-`Question: ${question}
-Correct Answer: ${answer}
-User's Answer: ${userAnswer}
-Respond ONLY with "Correct" or "Wrong".` }
+        { 
+          role: 'system', 
+          content: 'You are a math tutor. Return only one word: "Correct" or "Wrong". Do not explain or include any other text.' 
+        },
+        { 
+          role: 'user',
+          content: `Question: ${question}\nUser's Answer: ${answer}`
+        }
       ]
     });
-    const verdict = completion.choices[0].message.content.toLowerCase().trim();
-    res.json({ correct: verdict === 'correct', feedback: verdict });
-  } catch (err) { next(err); }
+    
+    // Return the response text directly
+    res.send(completion.choices[0].message.content.trim());
+  } catch (err) {
+    console.error('Validation error:', err);
+    next(err);
+  }
 });
 
 
