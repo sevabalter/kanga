@@ -119,7 +119,7 @@ app.post('/api/answer', async (req, res, next) => {
     const messages = [
       { 
         role: 'system', 
-        content: 'You are a math tutor. Return only one word: "Correct" or "Wrong". Do not explain or include any other text.' 
+        content: 'You are a math tutor. Determine if the user answer to the math problem is correct or wrong. Return only one word: "Correct" or "Wrong". Do not explain or include any other text.' 
       },
       { 
         role: 'user',
@@ -127,8 +127,6 @@ app.post('/api/answer', async (req, res, next) => {
       }
     ];
 
-    console.log('\n📤 OpenAI Request:');
-    console.log(JSON.stringify(messages, null, 2));
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
@@ -137,9 +135,6 @@ app.post('/api/answer', async (req, res, next) => {
     });
 
     const responseText = completion.choices[0].message.content.trim();
-
-    console.log('\n📥 OpenAI Response:');
-    console.log(responseText);
 
     res.send(responseText);
   } catch (err) {
