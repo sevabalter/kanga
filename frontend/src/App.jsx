@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, styled, TextField } from '@mui/material';
+import { Box, Button, Typography, styled, TextField, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
 
 const Container = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -37,6 +37,8 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [validationResult, setValidationResult] = useState('');
   const [isChecking, setIsChecking] = useState(false);
+  const [showApiDetails, setShowApiDetails] = useState(false);
+  const [apiDetails, setApiDetails] = useState('');
 
   const getNewQuestion = async () => {
     setIsLoading(true);
@@ -89,6 +91,30 @@ function App() {
 
       const result = await response.text();
       setValidationResult(result);
+
+      // Capture the API details
+      const apiDetails = {
+        request: {
+          url: 'https://kanga-production.up.railway.app/api/answer',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            question,
+            answer: answer.trim()
+          }
+        },
+        response: {
+          status: response.status,
+          statusText: response.statusText,
+          result
+        }
+      };
+
+      // Format the details for display
+      setApiDetails(JSON.stringify(apiDetails, null, 2));
+      setShowApiDetails(true);
     } catch (err) {
       setError('Error validating answer');
       console.error('Error:', err);
@@ -155,12 +181,15 @@ function App() {
               <TextField
                 fullWidth
                 variant="outlined"
-                label="Your Answer"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 margin="normal"
                 multiline
                 rows={4}
+                inputMode="numeric"
+                type="number"
+                disabled={isLoading || isChecking}
+                placeholder="Enter your answer..."
               />
               <Button
                 type="submit"
@@ -183,6 +212,23 @@ function App() {
           </ChatBox>
         </Box>
       )}
+
+      {/* OpenAI API Details Popup */}
+      <Dialog
+        open={showApiDetails}
+        onClose={() => setShowApiDetails(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>OpenAI API Details</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <pre style={{ whiteSpace: 'pre-wrap', backgroundColor: '#f5f5f5', padding: '16px', borderRadius: '4px', fontSize: '14px', lineHeight: '1.5' }}>
+              {apiDetails}
+            </pre>
+          </DialogContentText>
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 }
