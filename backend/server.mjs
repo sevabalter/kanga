@@ -115,30 +115,38 @@ app.get('/api/question', async (req, res) => {
 app.post('/api/answer', async (req, res, next) => {
   try {
     const { question, answer } = req.body;
+
+    const messages = [
+      { 
+        role: 'system', 
+        content: 'You are a math tutor. Return only one word: "Correct" or "Wrong". Do not explain or include any other text.' 
+      },
+      { 
+        role: 'user',
+        content: `Question: ${question}\nUser's Answer: ${answer}`
+      }
+    ];
+
+    console.log('\n📤 OpenAI Request:');
+    console.log(JSON.stringify(messages, null, 2));
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       temperature: 0,
-      messages: [
-        { 
-          role: 'system', 
-          content: 'You are a math tutor. Return only one word: "Correct" or "Wrong". Do not explain or include any other text.' 
-        },
-        { 
-          role: 'user',
-          content: `Question: ${question}\nUser's Answer: ${answer}`
-        }
-      ]
+      messages
     });
-    
-    // Return the response text directly
-    res.send(completion.choices[0].message.content.trim());
+
+    const responseText = completion.choices[0].message.content.trim();
+
+    console.log('\n📥 OpenAI Response:');
+    console.log(responseText);
+
+    res.send(responseText);
   } catch (err) {
-    console.error('Validation error:', err);
+    console.error('❌ Validation error:', err);
     next(err);
   }
 });
-
-
 
 /* ---------- start -------------------------------------------- */
 app.listen(PORT, () => {
