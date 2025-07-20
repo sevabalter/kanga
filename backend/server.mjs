@@ -119,7 +119,7 @@ app.post('/api/answer', async (req, res, next) => {
     const messages = [
       { 
         role: 'system', 
-        content: 'You are a math tutor. Please calculate the answer to the question first. Determine if the user answer to the math problem is correct or wrong based on your answer. Return the question, the answer you were provided an, wheter it is correct or wrong and why do you think so.' 
+        content: 'You are a math tutor. Please calculate the answer to the question first. Determine if the user answer to the math problem is correct or wrong based on your answer. Return only one word: Correct or Wrong. Do not explain or include any other text.' 
       },
       { 
         role: 'user',
