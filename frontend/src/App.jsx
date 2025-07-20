@@ -34,6 +34,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [answer, setAnswer] = useState('');
+  const [messages, setMessages] = useState([]);
 
   const getNewQuestion = async () => {
     setIsLoading(true);
@@ -54,29 +55,13 @@ function App() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!answer.trim()) return;
 
-    try {
-      const response = await fetch('https://kanga-production.up.railway.app/api/answer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ answer }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit answer');
-      }
-
-      // Clear the answer field after successful submission
-      setAnswer('');
-    } catch (err) {
-      setError('Error submitting answer');
-      console.error('Error:', err);
-    }
+    // Add the message to the chat
+    setMessages(prev => [...prev, { text: answer, isUser: true }]);
+    setAnswer('');
   };
 
   return (
@@ -100,6 +85,22 @@ function App() {
             </Typography>
           </QuestionBox>
           <ChatBox>
+            <Box sx={{ maxHeight: '300px', overflowY: 'auto', mb: 2 }}>
+              {messages.map((message, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: message.isUser ? '#e3f2fd' : '#f5f5f5',
+                    textAlign: message.isUser ? 'right' : 'left',
+                  }}
+                >
+                  <Typography>{message.text}</Typography>
+                </Box>
+              ))}
+            </Box>
             <form onSubmit={handleSubmit}>
               <TextField
                 fullWidth
@@ -117,7 +118,7 @@ function App() {
                 color="primary"
                 disabled={!answer.trim()}
               >
-                Submit Answer
+                Send
               </Button>
             </form>
           </ChatBox>
