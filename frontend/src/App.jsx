@@ -32,7 +32,7 @@ function App() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/question');
+      const response = await fetch('https://kanga-production.up.railway.app/api/question');
       if (!response.ok) {
         throw new Error('Failed to get question');
       }
