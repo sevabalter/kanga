@@ -32,7 +32,7 @@ function App() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:3001/api/question');
+      const response = await fetch('/api/question');
       if (!response.ok) {
         throw new Error('Failed to get question');
       }
