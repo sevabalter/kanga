@@ -35,6 +35,8 @@ function App() {
   const [error, setError] = useState('');
   const [answer, setAnswer] = useState('');
   const [messages, setMessages] = useState([]);
+  const [validationResult, setValidationResult] = useState('');
+  const [isChecking, setIsChecking] = useState(false);
 
   const getNewQuestion = async () => {
     setIsLoading(true);
@@ -62,6 +64,37 @@ function App() {
     // Add the message to the chat
     setMessages(prev => [...prev, { text: answer, isUser: true }]);
     setAnswer('');
+  };
+
+  const handleValidate = async () => {
+    if (!question || !answer.trim()) return;
+    setIsChecking(true);
+    setValidationResult('');
+
+    try {
+      const response = await fetch('https://kanga-production.up.railway.app/api/answer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question,
+          answer: answer.trim()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to validate answer');
+      }
+
+      const result = await response.text();
+      setValidationResult(result);
+    } catch (err) {
+      setError('Error validating answer');
+      console.error('Error:', err);
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   return (
@@ -100,6 +133,23 @@ function App() {
                   <Typography>{message.text}</Typography>
                 </Box>
               ))}
+              {validationResult && (
+                <Box
+                  sx={{
+                    mb: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: validationResult === 'Correct' ? '#e8f5e9' : '#ffebee',
+                    textAlign: 'center',
+                  }}
+                >
+                  <Typography
+                    color={validationResult === 'Correct' ? 'success.main' : 'error.main'}
+                  >
+                    {validationResult}
+                  </Typography>
+                </Box>
+              )}
             </Box>
             <form onSubmit={handleSubmit}>
               <TextField
@@ -119,6 +169,15 @@ function App() {
                 disabled={!answer.trim()}
               >
                 Send
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleValidate}
+                disabled={!answer.trim() || isChecking}
+                sx={{ ml: 2 }}
+              >
+                {isChecking ? 'Checking...' : 'Validate'}
               </Button>
             </form>
           </ChatBox>
