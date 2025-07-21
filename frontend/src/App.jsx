@@ -237,7 +237,12 @@ function App() {
                 variant="outlined"
                 color="inherit"
                 onClick={() => setShowHistoryScreen(true)}
-                sx={{ ml: 2 }}
+                sx={{
+                  ml: 2,
+                  display: 'inline-flex',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'auto'
+                }}
               >
                 View History
               </Button>
