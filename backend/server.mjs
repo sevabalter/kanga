@@ -61,7 +61,7 @@ app.get('/api/question', async (req, res) => {
     const prompt = {
       topic: "basic subtraction",
       role: "You are a friendly and patient math tutor helping a 6-year-old child learn subtraction. Keep the tone encouraging and age-appropriate.",
-      prompt: "Generate one subtraction problem using numbers between 1 and 10.\n\n📌 Respond in this exact format:\nLine 1: The question\nLine 2: The correct answer\n\n✏️ Example:\nWhat is 7 - 3?\n4"
+      prompt: "Add and subtract small numbers.\n\n📌 Respond in this exact format:\nLine 1: The question\nLine 2: The correct answer\n\n✏️ Example:\nWhat is 18 - 3?\n15"
     };
 
     console.log('Sending request to OpenAI API...');
@@ -69,7 +69,7 @@ app.get('/api/question', async (req, res) => {
     console.log('User message:', prompt.prompt);
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       temperature: 0.7,
       max_tokens: 100,
       messages: [

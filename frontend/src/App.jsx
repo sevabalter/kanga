@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, styled, TextField, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
+import { Box, Button, Typography, styled, TextField, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 
 const Container = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -39,6 +39,27 @@ function App() {
   const [isChecking, setIsChecking] = useState(false);
   const [showApiDetails, setShowApiDetails] = useState(false);
   const [apiDetails, setApiDetails] = useState('');
+  const [attempts, setAttempts] = useState(() => {
+    const savedAttempts = localStorage.getItem('mathAttempts');
+    return savedAttempts ? JSON.parse(savedAttempts) : [];
+  });
+  const [showHistoryScreen, setShowHistoryScreen] = useState(false);
+
+  const saveAttempt = (question, answer, result) => {
+    const newAttempt = {
+      id: Date.now(),
+      question,
+      answer,
+      result,
+      timestamp: new Date().toISOString()
+    };
+    
+    setAttempts(prev => {
+      const updatedAttempts = [...prev, newAttempt];
+      localStorage.setItem('mathAttempts', JSON.stringify(updatedAttempts));
+      return updatedAttempts;
+    });
+  };
 
   const getNewQuestion = async () => {
     setIsLoading(true);
@@ -91,6 +112,9 @@ function App() {
 
       const result = await response.text();
       setValidationResult(result);
+
+      // Save this attempt to local storage
+      saveAttempt(question, answer.trim(), result);
 
       // Capture the API details
       const apiDetails = {
@@ -209,8 +233,96 @@ function App() {
               >
                 {isChecking ? 'Checking...' : 'Validate'}
               </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                onClick={() => setShowHistoryScreen(true)}
+                sx={{ ml: 2 }}
+              >
+                View History
+              </Button>
             </form>
           </ChatBox>
+        </Box>
+      )}
+
+      {/* History Screen */}
+      {showHistoryScreen && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Box
+            sx={{
+              backgroundColor: 'white',
+              p: 4,
+              borderRadius: 2,
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              width: '100%',
+              position: 'relative',
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={() => setShowHistoryScreen(false)}
+              sx={{ position: 'absolute', top: 16, right: 16 }}
+            >
+              Close
+            </Button>
+            <Typography variant="h5" gutterBottom>
+              Attempt History
+            </Typography>
+            <Box sx={{ width: '100%', maxWidth: 600 }}>
+              {attempts.length > 0 ? (
+                attempts.map((attempt) => (
+                  <Box
+                    key={attempt.id}
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      borderRadius: 2,
+                      backgroundColor: attempt.result === 'Correct' ? '#e8f5e9' : '#ffebee',
+                      border: '1px solid',
+                      borderColor: attempt.result === 'Correct' ? 'success.main' : 'error.main',
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      {new Date(attempt.timestamp).toLocaleString()}
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                      Question: {attempt.question}
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                      Your Answer: {attempt.answer}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      color={attempt.result === 'Correct' ? 'success.main' : 'error.main'}
+                      fontWeight="bold"
+                    >
+                      Result: {attempt.result}
+                    </Typography>
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="body1" color="text.secondary">
+                  No attempts yet
+                </Typography>
+              )}
+            </Box>
+          </Box>
         </Box>
       )}
 
