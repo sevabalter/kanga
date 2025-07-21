@@ -178,19 +178,20 @@ function App() {
               )}
             </Box>
             <form onSubmit={handleSubmit}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                margin="normal"
-                multiline
-                rows={4}
-                inputMode="numeric"
-                type="number"
-                disabled={isLoading || isChecking}
-                placeholder="Enter your answer..."
-              />
+            <TextField
+  fullWidth
+  variant="outlined"
+  value={answer}
+  onChange={(e) => setAnswer(e.target.value)}
+  margin="normal"
+  inputProps={{
+    inputMode: 'numeric',
+    pattern: '[0-9]*'
+  }}
+  type="text" // keep as "text" to avoid iOS issues with "number"
+  disabled={isLoading || isChecking}
+  placeholder="Enter your numeric answer..."
+/>
               <Button
                 type="submit"
                 variant="contained"
